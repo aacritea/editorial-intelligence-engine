@@ -1,0 +1,15 @@
+pandas
+numpy
+scikit-learn
+lightgbm
+xgboost
+sentence-transformers
+transformers
+torch
+streamlit
+plotly
+spacy
+textstat
+joblib
+pyarrow
+tqdm
