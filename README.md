@@ -241,7 +241,7 @@ The Streamlit dashboard provides:
 ## 1. Clone Repository
 
 ```bash
-git clone https://github.com/yourusername/editorial-intelligence-engine.git
+git clone https://github.com/aacritea/editorial-intelligence-engine.git
 cd editorial-intelligence-engine
 ```
 
@@ -360,7 +360,7 @@ rather than heavyweight deep learning experimentation.
 
 - GitHub: https://github.com/aacritea
 - Portfolio: https://aacritea.framer.wiki
-- LinkedIn: https://linkedin.com/in/aakriti-jain-a76386250
+- LinkedIn: https://linkedin.com/in/aacritea
 
 ---
 
