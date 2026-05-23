@@ -1,3 +1,14 @@
+---
+title: Editorial Intelligence Engine
+emoji: 📰
+colorFrom: blue
+colorTo: indigo
+sdk: streamlit
+sdk_version: 1.45.1
+app_file: dashboard.py
+pinned: false
+---
+
 # 📰 Editorial Intelligence Engine
 
 > AI-powered editorial intelligence platform for engagement-aware news ranking and front-page optimization using NLP, behavioral analytics, and learning-to-rank systems.
