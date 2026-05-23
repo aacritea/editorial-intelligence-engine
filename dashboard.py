@@ -373,18 +373,19 @@ html, body, [class*="css"] {
 @st.cache_data
 def load_manifest(path: str) -> pd.DataFrame:
     p = Path(path)
-    if p.exists():
-        return pd.read_parquet(path)
-    return _synthetic_manifest()
+    if not p.exists():
+        st.error(f"Missing file: {path}")
+        st.stop()
+    return pd.read_parquet(path)
 
 
 @st.cache_data
 def load_ranked(path: str) -> pd.DataFrame:
     p = Path(path)
-    if p.exists():
-        df = pd.read_parquet(path)
-        return df
-    return _synthetic_ranked()
+    if not p.exists():
+        st.error(f"Missing file: {path}")
+        st.stop()
+    return pd.read_parquet(path)
 
 
 def _synthetic_manifest() -> pd.DataFrame:
@@ -598,6 +599,13 @@ def render_sidebar(manifest: pd.DataFrame, ranked: pd.DataFrame):
             for lbl, val, mx, accent in explain_items
         )
         st.sidebar.markdown(html_blocks, unsafe_allow_html=True)
+        st.sidebar.info(
+            f"""
+            This article was prioritized due to strong predicted engagement,
+            high visibility weighting, and favorable editorial relevance
+            signals derived from behavioral and semantic ranking features.
+            """
+        )
 
     return selected_cats, min_score, selected_zones
 
@@ -644,6 +652,7 @@ def render_stats_row(manifest: pd.DataFrame, ranked: pd.DataFrame):
     avg_vis = manifest["visibility"].mean()
     avg_eng = manifest["composite_score"].mean()
     top_cat = manifest["category"].value_counts().idxmax()
+    top_score = manifest["composite_score"].max()
     n_slots = len(manifest)
     cb_flag = (ranked["cb_composite_score"] > 0.6).sum() if "cb_composite_score" in ranked.columns else 0
 
@@ -653,6 +662,7 @@ def render_stats_row(manifest: pd.DataFrame, ranked: pd.DataFrame):
         (f"{avg_vis:.2f}",      "Avg Visibility",        "weighted mean",             False),
         (f"{avg_eng:.3f}",      "Avg Engagement",        "composite score",           False),
         (top_cat.upper(),       "Lead Category",         "most represented",          False),
+        (f"{top_score:.3f}",    "Top Score",             "highest composite score",   False),
         (str(cb_flag),          "Clickbait Flagged",     "score > 0.6",              cb_flag > 3),
     ]
 
@@ -680,7 +690,12 @@ def render_hero(row: pd.Series):
             {vis_pill(row['visibility'], row['zone'])}
         </div>
         <div class="headline">{row['title']}</div>
-        {score_bar_html(row['composite_score'])}
+
+        <div class="score-inline">
+            Model Confidence: {(row['rank_score'] * 100):.1f}%
+        </div>
+
+    {score_bar_html(row['composite_score'])}
     </div>
     """, unsafe_allow_html=True)
 
@@ -697,6 +712,11 @@ def render_article_card(row: pd.Series, rank_num: int):
             {vis_pill(row['visibility'], row['zone'])}
         </div>
         <div class="{hl_cls}">{row['title']}</div>
+
+        <div class="score-inline">
+            Model Confidence: {(row['rank_score'] * 100):.1f}%
+        </div>
+
         {score_bar_html(row['composite_score'])}
     </div>
     """, unsafe_allow_html=True)
