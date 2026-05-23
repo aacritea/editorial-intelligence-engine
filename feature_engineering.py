@@ -22,6 +22,10 @@ from textstat import (
 from transformers import pipeline
 
 logger = logging.getLogger(__name__)
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s"
+)
 
 # ─── Model Registry ──────────────────────────────────────────────────────────
 
@@ -380,6 +384,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     df = pd.read_parquet(args.input)
+    df = df.sample(50000, random_state=42)
+    logger.info("Using sampled subset — %d rows", len(df))
     features = build_editorial_features(
         df,
         use_sentiment=not args.no_sentiment,
