@@ -29,6 +29,7 @@ Traditional editorial workflows rely heavily on manual curation and subjective p
 
 - NLP feature engineering
 - behavioral interaction analytics
+- transformer embeddings
 - learning-to-rank models
 - engagement prediction
 - front-page visibility optimization
@@ -39,15 +40,18 @@ to dynamically rank stories for maximum audience traction.
 
 # ✨ Features
 
-- 🧠 Learning-to-rank pipeline using LightGBM Ranker
-- 📰 Newspaper-style Streamlit dashboard
+- 🧠 LightGBM LambdaRank learning-to-rank pipeline
+- 📰 Newspaper-style Streamlit editorial dashboard
 - 📊 Engagement-aware article ranking
-- 🔍 Explainable ranking decisions
+- 🔍 Explainable AI ranking insights
 - 📈 Behavioral analytics and CTR modeling
-- 🧾 NLP feature engineering for headlines
+- 🧾 NLP-driven headline intelligence
 - ⚡ Visibility-aware front-page optimization
-- 🎯 Ranking evaluation using NDCG@K and MAP
-- 🧪 Synthetic fallback data generation for demos
+- 🎯 NDCG and MRR ranking evaluation
+- 🧪 Semantic embeddings using Sentence Transformers
+- 📉 Feature importance analytics
+- 🧠 Editorial-quality scoring engine
+- 🗂️ Category-aware article zoning system
 
 ---
 
@@ -58,13 +62,15 @@ News Articles
       ↓
 Data Preprocessing Pipeline
       ↓
-NLP Feature Engineering
+Editorial NLP Feature Engineering
       ↓
-Engagement Prediction
+Sentence Embedding Generation
       ↓
-Learning-to-Rank Engine
+Behavioral Signal Aggregation
       ↓
-Front-Page Optimization
+LightGBM LambdaRank Model
+      ↓
+Front-Page Optimization Engine
       ↓
 Interactive Editorial Dashboard
 ```
@@ -76,11 +82,13 @@ Interactive Editorial Dashboard
 This project focuses on:
 
 - Editorial Intelligence
-- Learning-to-Rank Systems
 - Recommendation Systems
+- Learning-to-Rank Systems
 - Engagement Prediction
 - NLP Feature Engineering
+- Semantic Search
 - Behavioral Analytics
+- Explainable AI
 - Front-Page Optimization
 
 Unlike traditional classification-based news systems, this platform treats editorial ranking as a ranking optimization problem.
@@ -90,31 +98,25 @@ Unlike traditional classification-based news systems, this platform treats edito
 # 📂 Project Structure
 
 ```text
-editorial-intelligence-engine/
+news_editorial/
 │
 ├── data/
 │   ├── raw/
-│   │   ├── news.tsv
-│   │   └── behaviors.tsv
-│   │
-│   └── processed/
-│       └── mind_clean.parquet
+│   ├── processed/
+│   └── cache/
 │
 ├── models/
 │
-├── notebooks/
-│
-├── src/
-│   ├── mind_preprocessing.py
-│   ├── feature_engineering.py
-│   ├── embeddings.py
-│   ├── ranker.py
-│   ├── optimizer.py
-│   ├── inference.py
-│   └── dashboard.py
+├── dashboard.py
+├── embeddings.py
+├── feature_engineering.py
+├── mind_preprocessing.py
+├── optimizer.py
+├── ranker.py
 │
 ├── requirements.txt
-├── .gitignore
+├── runtime.txt
+├── Dockerfile
 └── README.md
 ```
 
@@ -124,7 +126,7 @@ editorial-intelligence-engine/
 
 ## Microsoft MIND Dataset
 
-This project uses the Microsoft MIND dataset, a large-scale benchmark dataset for news recommendation and ranking systems.
+This project uses the Microsoft MIND dataset, a large-scale benchmark dataset for news recommendation and editorial ranking systems.
 
 ### Includes
 
@@ -133,7 +135,14 @@ This project uses the Microsoft MIND dataset, a large-scale benchmark dataset fo
 - User impressions
 - Click interactions
 - Reading history
-- Engagement signals
+- Behavioral engagement signals
+
+### Dataset Scale
+
+- 11.2M+ impression–article interactions
+- 100K+ news articles
+- Large-scale clickstream behavior
+- Multi-category news coverage
 
 ### Dataset Link
 
@@ -146,7 +155,7 @@ https://msnews.github.io/
 ## Machine Learning
 
 - LightGBM Ranker
-- XGBoost
+- LambdaMART
 - Scikit-learn
 
 ## NLP
@@ -160,6 +169,7 @@ https://msnews.github.io/
 - Python
 - Pandas
 - NumPy
+- PyArrow
 
 ## Frontend
 
@@ -187,30 +197,22 @@ The ranking engine extracts a combination of linguistic, behavioral, and context
 - Named entities
 - Recency
 - Metadata encoding
+- Transformer embeddings
 
 ## Behavioral Features
 
 - Historical CTR
 - Global click statistics
 - Category popularity
+- Session diversity
 - User interaction frequency
-- Session diversity metrics
+- Reading history depth
 
 ---
 
-# 📈 Ranking Models
+# 🧠 Embedding Pipeline
 
-The project prioritizes ranking systems instead of standard classification models.
-
-## Models Used
-
-- LightGBM Ranker
-- XGBoost Ranker
-- LambdaMART
-
-## Embeddings
-
-Sentence embeddings are generated using:
+Semantic article representations are generated using:
 
 ```python
 all-MiniLM-L6-v2
@@ -218,19 +220,67 @@ all-MiniLM-L6-v2
 
 via Sentence Transformers.
 
+## Embedding Optimizations
+
+- Deduplicated embedding generation
+- MPS acceleration on Apple Silicon
+- Cached transformer inference
+- Reduced-dimensional ranking embeddings
+- Title + abstract fused embeddings
+
 ---
 
-# 📊 Ranking Metrics
+# 📈 Ranking Models
 
-Evaluation focuses on ranking quality rather than binary accuracy.
+The project prioritizes ranking systems over standard classification models.
 
-## Metrics
+## Models Used
 
-- NDCG@K
-- MAP
-- MRR
+- LightGBM Ranker
+- LambdaMART
+- Gradient Boosted Decision Trees
 
-These metrics better reflect real-world editorial ranking performance.
+## Objective
+
+The system optimizes article ranking quality rather than binary prediction accuracy.
+
+---
+
+# 📊 Model Evaluation
+
+Evaluation focuses on ranking quality and recommendation effectiveness.
+
+## Final Validation Metrics
+
+| Metric | Score |
+|---|---|
+| NDCG@5 | 0.155 |
+| NDCG@10 | 0.163 |
+| NDCG@20 | 0.164 |
+| MRR | 0.146 |
+
+## Training Dataset Scale
+
+| Component | Scale |
+|---|---|
+| Impression–Article Pairs | 11.2M+ |
+| Training Rows | 1.5M |
+| Unique Articles | 100K+ |
+| Embedding Dimensions | 64 |
+| Engineered Features | 70+ |
+
+## Top Predictive Features
+
+| Feature | Importance |
+|---|---|
+| global_ctr | Highest |
+| global_clicks | Very High |
+| global_impressions | Very High |
+| session_size | High |
+| history_len | Moderate |
+| semantic embeddings | Significant |
+
+The ranking model demonstrates strong engagement prediction capability while leveraging semantic and behavioral ranking signals.
 
 ---
 
@@ -240,10 +290,12 @@ The Streamlit dashboard provides:
 
 - Front-page article ranking visualization
 - Engagement score analytics
-- Explainable ranking insights
+- Explainable ranking decisions
 - Topic/category filtering
 - Visibility-aware layout scoring
+- Feature importance analytics
 - Interactive newspaper-style UI
+- Real-time editorial controls
 
 ---
 
@@ -292,23 +344,49 @@ python -m spacy download en_core_web_sm
 
 ---
 
-# 🧪 Data Preprocessing
+# 🧪 Full ML Pipeline
 
-Run preprocessing pipeline:
+## 1. Preprocess MIND Dataset
 
 ```bash
-python src/mind_preprocessing.py \
-  --news data/raw/news.tsv \
-  --behaviors data/raw/behaviors.tsv \
+python mind_preprocessing.py \
+  --news MINDlarge_train/news.tsv \
+  --behaviors MINDlarge_train/behaviors.tsv \
   --output data/processed/mind_clean.parquet
 ```
 
 ---
 
-# ▶️ Run Dashboard
+## 2. Generate Semantic Embeddings
 
 ```bash
-streamlit run src/dashboard.py
+python embeddings.py \
+  --input data/processed/mind_clean.parquet \
+  --output data/processed/mind_embedded.parquet \
+  --fuse-abstract \
+  --device mps \
+  --batch-size 128
+```
+
+---
+
+## 3. Train Ranking Model
+
+```bash
+python ranker.py train \
+  --input data/processed/mind_embedded.parquet \
+  --model-dir models/ranker \
+  --num-leaves 31 \
+  --lr 0.05 \
+  --n-estimators 800
+```
+
+---
+
+## 4. Launch Dashboard
+
+```bash
+streamlit run dashboard.py
 ```
 
 ---
@@ -317,11 +395,12 @@ streamlit run src/dashboard.py
 
 | Feature | Description |
 |---|---|
-| `global_ctr` | Historical click-through rate |
-| `history_len` | User reading history length |
-| `session_size` | Number of candidate articles |
-| `title_len` | Headline character length |
-| `history_cat_diversity` | Diversity of user reading interests |
+| global_ctr | Historical click-through rate |
+| history_len | Reading history depth |
+| session_size | Candidate article count |
+| history_cat_diversity | Diversity of user interests |
+| emb_23 | Learned semantic representation |
+| emb_43 | Learned semantic representation |
 
 ---
 
@@ -329,23 +408,25 @@ streamlit run src/dashboard.py
 
 This project was designed to demonstrate:
 
+- Learning-to-rank systems
 - Practical ML engineering
-- Ranking systems
 - Recommendation pipelines
+- NLP feature engineering
 - Behavioral interaction modeling
 - Explainable AI systems
-- NLP feature engineering
+- Editorial optimization workflows
 - Product-oriented AI design
 
 ---
 
 # 🔮 Future Improvements
 
-- Real-time news ingestion APIs
 - Personalized recommendation systems
+- Real-time news ingestion APIs
+- Cross-encoder reranking
 - Temporal trend forecasting
-- Multi-objective optimization
-- Reinforcement-learning-based layout optimization
+- Reinforcement-learning layout optimization
+- Multi-objective ranking systems
 - A/B testing simulation
 - User personalization engine
 
@@ -356,12 +437,21 @@ This project was designed to demonstrate:
 The project emphasizes:
 
 - scalable ranking systems
-- recommendation system engineering
-- practical NLP pipelines
+- recommendation engineering
+- semantic retrieval pipelines
 - engagement-aware optimization
+- explainable editorial AI
 - production-style ML architecture
 
 rather than heavyweight deep learning experimentation.
+
+---
+
+# 🌐 Live Demo
+
+## Hugging Face Space
+
+https://aacritea-editorial-intelligence-engine.hf.space
 
 ---
 
