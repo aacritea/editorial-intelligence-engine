@@ -62,3 +62,4 @@ dist/
 
 # Parquet files
 *.parquet
+editorial-intelligence-engine/

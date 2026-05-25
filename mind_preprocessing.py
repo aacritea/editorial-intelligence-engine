@@ -142,8 +142,16 @@ def preprocess(
     behaviors = load_behaviors(behaviors_path)
 
     # Development subset for faster iteration
-    behaviors = behaviors.sample(50000, random_state=42)
-    logger.info("Using sampled subset — %d sessions", len(behaviors))
+    #behaviors = behaviors.sample(50000, random_state=42)
+    MAX_SESSIONS = 300000
+
+    if len(behaviors) > MAX_SESSIONS:
+        behaviors = behaviors.sample(MAX_SESSIONS, random_state=42)
+
+    logger.info(
+        "Using sampled subset — %d sessions",
+        len(behaviors)
+    )
 
     df = parse_impressions(behaviors)
 

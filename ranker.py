@@ -190,6 +190,29 @@ def evaluate_ndcg(
 
     return {metric: float(np.mean(vals)) for metric, vals in results.items()}
 
+def mean_reciprocal_rank(
+    df: pd.DataFrame,
+    score_col: str,
+    label_col: str,
+    group_col: str,
+) -> float:
+
+    rr_scores = []
+
+    for _, grp in df.groupby(group_col):
+
+        grp_sorted = grp.sort_values(score_col, ascending=False)
+
+        labels = grp_sorted[label_col].values
+
+        ranks = np.where(labels == 1)[0]
+
+        if len(ranks) == 0:
+            rr_scores.append(0.0)
+        else:
+            rr_scores.append(1.0 / (ranks[0] + 1))
+
+    return float(np.mean(rr_scores))
 
 # ─── Feature Importance ──────────────────────────────────────────────────────
 
@@ -297,6 +320,13 @@ def train(
     val_df["rank_score"] = val_scores
     ndcg_metrics         = evaluate_ndcg(val_df, "rank_score", config.label_col, config.group_col)
 
+    mrr = mean_reciprocal_rank(
+        val_df,
+        "rank_score",
+        config.label_col,
+        config.group_col,
+    )
+
     logger.info("Validation NDCG metrics: %s", ndcg_metrics)
 
     # Feature importance
@@ -306,6 +336,7 @@ def train(
     metrics = {
         "best_iteration": booster.best_iteration,
         "best_score":     booster.best_score,
+        "mrr":            mrr,
         **ndcg_metrics,
     }
     save_model(booster, feature_cols, config, metrics, config.model_dir)
@@ -367,7 +398,45 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 
     if args.cmd == "train":
-        df  = pd.read_parquet(args.input)
+        columns_to_keep = [
+            "impression_id",
+            "clicked",
+            "global_ctr",
+            "global_clicks",
+            "global_impressions",
+            "history_len",
+            "history_cat_diversity",
+            "session_size",
+            ]
+
+        # keep reduced embedding dimensions
+        embedding_cols = [
+            f"emb_{i}"
+            for i in range(64)
+        ]
+
+        columns_to_keep.extend(embedding_cols)
+
+        logger.info("Loading reduced feature set")
+
+        df = pd.read_parquet(
+            args.input,
+            columns=columns_to_keep,
+        )
+
+        MAX_ROWS = 1500000
+
+        if len(df) > MAX_ROWS:
+
+            logger.info(
+                "Sampling %d rows from %d",
+                MAX_ROWS,
+                len(df),
+            )
+
+            df = df.sample(MAX_ROWS, random_state=42)
+
+        logger.info("Training dataframe shape: %s", df.shape)
         cfg = RankerConfig(
             num_leaves   = args.num_leaves,
             learning_rate= args.lr,
@@ -387,5 +456,15 @@ if __name__ == "__main__":
         booster, feature_cols, config = load_model(args.model_dir)
         ranked = rank(df, booster, feature_cols, config.group_col)
         ranked.to_parquet(args.output, index=False)
-        logger.info("Ranked output → %s  shape=%s", args.output, ranked.shape)
-        print(ranked[["impression_id", "news_id", "rank_score", "rank_position"]].head(20))
+
+        logger.info(
+            "Ranked output → %s  shape=%s",
+            args.output,
+            ranked.shape,
+        )
+
+        print(
+            ranked[
+                ["impression_id", "news_id", "rank_score", "rank_position"]
+            ].head(20)
+        )

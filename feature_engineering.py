@@ -11,6 +11,7 @@ from typing import Optional
 
 import numpy as np
 import pandas as pd
+from sklearn.metrics.pairwise import cosine_similarity
 import spacy
 from textstat import (
     flesch_reading_ease,
@@ -299,6 +300,43 @@ def readability_features(df: pd.DataFrame, col: str = "title") -> pd.DataFrame:
 
     return pd.DataFrame(rows, index=df.index)
 
+def semantic_alignment_features(
+    df: pd.DataFrame,
+    emb_prefix: str = "fused_emb",
+) -> pd.DataFrame:
+
+    emb_cols = sorted([
+        c for c in df.columns
+        if c.startswith(f"{emb_prefix}_")
+    ])
+
+    if not emb_cols:
+        return pd.DataFrame(index=df.index)
+
+    embeddings = df[emb_cols].values.astype(np.float32)
+
+    scores = []
+
+    for _, row in df.iterrows():
+
+        history_len = row.get("history_len", 0)
+
+        if history_len <= 0:
+            scores.append(0.0)
+            continue
+
+        current_vec = row[emb_cols].values.astype(np.float32)
+
+        similarity = cosine_similarity(
+            [current_vec],
+            embeddings.mean(axis=0).reshape(1, -1)
+        )[0][0]
+
+        scores.append(float(similarity))
+
+    return pd.DataFrame({
+        "semantic_alignment_score": scores
+    }, index=df.index)
 
 # ─── 7. Clickbait Probability ────────────────────────────────────────────────
 
@@ -361,6 +399,7 @@ def build_editorial_features(
         topic_encoding_features(df, title_col, category_col=category_col),
         readability_features(df, title_col),
         clickbait_features(df, title_col, use_model=use_clickbait_model),
+        semantic_alignment_features(df),
     ]
 
     if use_sentiment:

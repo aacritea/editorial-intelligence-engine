@@ -8,6 +8,8 @@ import logging
 import os
 import pickle
 from pathlib import Path
+from sys import prefix
+from sys import prefix
 from typing import Optional
 
 import numpy as np
@@ -234,7 +236,19 @@ def embed_dataframe(
     Returns:
         pd.DataFrame with embedding columns appended
     """
-    texts = df[text_col].fillna("").tolist()
+    texts_df = (
+    df[["news_id", text_col]]
+    .drop_duplicates("news_id")
+    .reset_index(drop=True)
+    )
+
+    logger.info(
+        "Embedding unique articles only — %d unique news items",
+        len(texts_df),
+    )
+
+    texts = texts_df[text_col].fillna("").tolist()
+
     cache = EmbeddingCache(cache_dir) if use_cache else None
 
     embeddings = embed_texts(
@@ -245,20 +259,32 @@ def embed_dataframe(
         normalize=normalize,
         cache=cache,
         show_progress=show_progress,
-    )
+)
 
-    if as_column:
-        out = df.copy()
-        out[f"{prefix}_vec"] = list(embeddings)
-        return out
+    emb_cols = [
+        f"{prefix}_{i}"
+        for i in range(embeddings.shape[1])
+    ]
 
     emb_df = pd.DataFrame(
         embeddings,
-        columns=[f"{prefix}_{i}" for i in range(embeddings.shape[1])],
-        index=df.index,
+        columns=emb_cols,
     )
-    return pd.concat([df, emb_df], axis=1)
 
+    texts_df = pd.concat(
+        [texts_df[["news_id"]], emb_df],
+        axis=1,
+    )
+
+    logger.info("Merging embeddings back to full dataframe")
+
+    out = df.merge(
+        texts_df,
+        on="news_id",
+        how="left",
+    )
+
+    return out
 
 # ─── Multi-field Fusion Embedding ────────────────────────────────────────────
 
@@ -372,3 +398,5 @@ if __name__ == "__main__":
     out.to_parquet(args.output, index=False)
     logger.info("Saved → %s  shape=%s", args.output, out.shape)
     print(out.filter(regex=f"^{args.prefix}_").iloc[:2])
+
+    
